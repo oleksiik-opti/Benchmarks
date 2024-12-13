@@ -4,6 +4,24 @@
 
 ## `Join()` vs `Where(x => y.Contains(x))`
 
+### Description
+```csharp
+var people =
+[
+    (id: 1, name: "Alice"),
+    (id: 2, name: "Bob"),
+    (id: 3, name: "Charlie"),
+];
+
+var relevantIds = [1, 3];
+
+// Join approach
+var filteredPeople = people.Join(relevantIds, p => p.id, id => id, (p, _) => p);
+
+// Where approach
+var filteredPeople = people.Where(p => relevantIds.Contains(p.id));
+```
+
 ### Environment
 ```
 BenchmarkDotNet v0.14.0, macOS Sonoma 14.6.1 (23G93) [Darwin 23.6.0]
