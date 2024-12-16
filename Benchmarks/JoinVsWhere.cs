@@ -1,49 +1,61 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+
 namespace Benchmarks;
 
-public class Foo
+public class UserDetails
 {
-    public int Bar { get; set; }
+    public int Id { get; set; }
 
-    public string PropA { get; set; }
-    public string PropB { get; set; }
-    public string PropC { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string Email { get; set; }
 }
 
 [MemoryDiagnoser]
 public class Benchmark
 {
-    private static List<Foo> _foos = Enumerable
-        .Range(0, 20)
-        .Select(x => new Foo
-        {
-            Bar = x,
-            PropA = x.ToString(),
-            PropB = x.ToString(),
-            PropC = x.ToString()
-        })
-        .ToList();
+    private List<UserDetails> _users;
+    private int[] _userIds;
 
-    private static int[] _bars = [3, 4, 5, 8, 9, 10, 14, 15, 16, 19];
+    [Params(20, 200, 2000)]
+    public int N;
+
+    [GlobalSetup]
+    public void Setup()
+    {
+        _users = Enumerable
+            .Range(0, 20)
+            .Select(x => new UserDetails
+            {
+                Id = x,
+                FirstName = x.ToString(),
+                LastName = x.ToString(),
+                Email = x.ToString()
+            })
+            .ToList();
+
+        _userIds = Enumerable.Range(0, N).Where(x => x % 3 == 0).ToArray();
+    }
 
     [Benchmark(Baseline = true)]
-    public List<Foo> Join()
+    public List<UserDetails> Join()
     {
-        return _foos.Join(_bars, f => f.Bar, b => b, (f, _) => f).ToList();
+        return _users.Join(_userIds, f => f.Id, b => b, (f, _) => f).ToList();
     }
 
     [Benchmark]
-    public List<Foo> Where()
+    public List<UserDetails> Where()
     {
-        return _foos.Where(f => _bars.Contains(f.Bar)).ToList();
+        return _users.Where(f => _userIds.Contains(f.Id)).ToList();
     }
 }
 
 internal class JoinVsWhere
 {
-    static void Main(string[] args)
+    public static void Main()
     {
         BenchmarkRunner.Run<Benchmark>();
     }
