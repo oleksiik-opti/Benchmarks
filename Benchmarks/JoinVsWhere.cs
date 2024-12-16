@@ -27,7 +27,7 @@ public class Benchmark
     public void Setup()
     {
         _users = Enumerable
-            .Range(0, 20)
+            .Range(0, N)
             .Select(x => new UserDetails
             {
                 Id = x,
